@@ -2,21 +2,23 @@
 const dns = require('dns');
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
-//DEPEND
-const express = require("express")
-const app = express()
-require("dotenv").config()
-require('./db/connection')
-const PORT = process.env.PORT;
+require("dotenv").config();
+require("./config/db-connection");
+const express = require("express");
+const path = require("path");
+const morgan = require("morgan");
 
+const app = express();
+const PORT = process.env.PORT || 3001;
 
-//MIDDLEWARE
-app.use(express.urlencoded({ extended: true }));
-// app.use(methodOverride("_method"));
-app.use(express.static("public"));
-app.use(express.json())
+app.use(express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded());
+app.use(express.json());
+app.use(morgan("dev"));
 
- // PORT
-app.listen(PORT, ()=>{
-    console.log(`Sever is running on port: http://localhost:${PORT}`)
-})
+const authRouter = require("./routes/user-routes");
+app.use("/api/auth", authRouter);
+
+app.listen(PORT, () => {
+  console.log(`Server is listening @ http://localhost:${PORT}`);
+});
